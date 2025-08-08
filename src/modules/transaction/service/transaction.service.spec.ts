@@ -13,6 +13,7 @@ describe('TransactionService', () => {
 
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
+    get: jest.fn().mockResolvedValue([mockTransaction]),
   };
 
   beforeAll(async () => {
@@ -42,5 +43,23 @@ describe('TransactionService', () => {
     expect(createdTransaction.description).toBe(mockTransaction.description);
     expect(createdTransaction.type).toBe(mockTransaction.type);
     expect(createdTransaction.amount).toBe(mockTransaction.amount);
+  });
+
+  it('Should findAll transactions', async () => {
+    const transactions = await transactionService.get();
+
+    expect(transactions).toEqual([mockTransaction]);
+    expect(transactionService.get).toHaveBeenCalled();
+  });
+
+  it('Should call create with preserved context', async () => {
+    const executor = async (
+      callback: (data: typeof mockTransaction) => Promise<any>,
+    ) => {
+      return await callback(mockTransaction);
+    };
+
+    const result = await executor((data) => transactionService.create(data));
+    expect(result).toEqual(mockTransaction);
   });
 });

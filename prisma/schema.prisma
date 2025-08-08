@@ -8,10 +8,11 @@ datasource db {
 }
 
 model User {
-    id        Int  @default(autoincrement()) @id
+    id        String  @default(uuid())
     email     String   @unique
     name      String
     createdAt DateTime @default(now())
+    password  String
 }
 
 model Transaction {

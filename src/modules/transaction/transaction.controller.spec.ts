@@ -13,6 +13,7 @@ describe('TransactionController', () => {
 
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
+    get: jest.fn().mockResolvedValue([mockTransaction]),
   };
 
   beforeAll(async () => {
@@ -44,5 +45,12 @@ describe('TransactionController', () => {
 
     expect(mockTransactionService.create).toHaveBeenCalledWith(mockTransaction);
     expect(result).toEqual(mockTransaction);
+  });
+
+  it('should call get method of TransactionService and return a transaction', async () => {
+    const allResult = await transactionController.get();
+
+    expect(mockTransactionService.get).toHaveBeenCalledWith();
+    expect(allResult).toEqual([mockTransaction]);
   });
 });
