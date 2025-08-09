@@ -11,9 +11,12 @@ describe('TransactionService', () => {
     amount: 100,
   };
 
+  const mockTypeTransaction = 175;
+
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
     get: jest.fn().mockResolvedValue([mockTransaction]),
+    getTotalAmountByType: jest.fn().mockResolvedValue(mockTypeTransaction),
   };
 
   beforeAll(async () => {
@@ -61,5 +64,15 @@ describe('TransactionService', () => {
 
     const result = await executor((data) => transactionService.create(data));
     expect(result).toEqual(mockTransaction);
+  });
+
+  it('Should find total type transaction', async () => {
+    const typeTransactions =
+      await transactionService.getTotalAmountByType('cashIn');
+
+    expect(mockTransactionService.getTotalAmountByType).toHaveBeenCalledWith(
+      'cashIn',
+    );
+    expect(typeTransactions).toEqual(mockTypeTransaction);
   });
 });

@@ -19,4 +19,23 @@ export class TransactionService {
   async get(): Promise<Transaction[]> {
     return this.model.transaction.findMany();
   }
+
+  async getTotalAmountByType(typeTransaction: string): Promise<number> {
+    const transactionsCashIn = await this.model.transaction.findMany({
+      where: {
+        type: typeTransaction,
+      },
+      select: {
+        amount: true,
+      },
+    });
+
+    const total = transactionsCashIn.reduce(
+      (acc, transaction) => acc + transaction.amount,
+      0,
+    );
+
+    return total;
+  }
+
 }

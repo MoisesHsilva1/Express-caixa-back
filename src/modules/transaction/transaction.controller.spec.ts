@@ -6,14 +6,18 @@ describe('TransactionController', () => {
   let transactionController: TransactionController;
 
   const mockTransaction = {
+    id: 1,
     description: 'New investment',
     type: 'cashIn',
     amount: 100,
   };
 
+  const mockTotalAmountByType = 100;
+
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
     get: jest.fn().mockResolvedValue([mockTransaction]),
+getTotalAmountByType: jest.fn().mockResolvedValue(mockTotalAmountByType),
   };
 
   beforeAll(async () => {
@@ -40,17 +44,32 @@ describe('TransactionController', () => {
     expect(transactionController).toBeDefined();
   });
 
-  it('should call create method of TransactionService and return a transaction', async () => {
-    const result = await transactionController.create(mockTransaction);
+  it('should call create and return created transaction', async () => {
+    const dto = {
+      description: 'New investment',
+      type: 'cashIn',
+      amount: 100,
+    };
 
-    expect(mockTransactionService.create).toHaveBeenCalledWith(mockTransaction);
+    const result = await transactionController.create(dto);
+
+    expect(mockTransactionService.create).toHaveBeenCalledWith(dto);
     expect(result).toEqual(mockTransaction);
   });
 
-  it('should call get method of TransactionService and return a transaction', async () => {
-    const allResult = await transactionController.get();
+  it('should call get and return all transactions', async () => {
+    const result = await transactionController.get();
 
-    expect(mockTransactionService.get).toHaveBeenCalledWith();
-    expect(allResult).toEqual([mockTransaction]);
+    expect(mockTransactionService.get).toHaveBeenCalled();
+    expect(result).toEqual([mockTransaction]);
+  });
+
+  it('should return total amount of transactions by type', async () => {
+    const result = await transactionController.getTotalAmountByType('cashIn');
+
+    expect(mockTransactionService.getTotalAmountByType).toHaveBeenCalledWith(
+      'cashIn',
+    );
+    expect(result).toEqual(mockTotalAmountByType);
   });
 });
