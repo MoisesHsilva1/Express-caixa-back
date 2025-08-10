@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from './service/transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from '@prisma/client';
+import { ReportTransactionDto } from './dto/report-transaction.dto';
 
 @ApiTags('Transctions')
 @Controller('transactions')
@@ -23,10 +24,10 @@ export class TransactionController {
     return this.transactionService.get();
   }
 
-  @Get('total-by-type/:type')
-  @ApiOperation({ summary: 'Get total amount of transactions by type' })
+  @Get('transaction-report')
+  @ApiOperation({ summary: 'Get report transaction' })
   @ApiResponse({ status: 200, description: 'Success' })
-  async getTotalAmountByType(@Param('type') type: string): Promise<number> {
-    return this.transactionService.getTotalAmountByType(type);
+  async getTotalAmountByType(): Promise<ReportTransactionDto> {
+    return this.transactionService.getTransactionsReport();
   }
 }

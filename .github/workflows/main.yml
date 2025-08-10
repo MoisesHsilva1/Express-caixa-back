@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy
 
 on:
   push:
@@ -11,28 +11,35 @@ on:
 jobs:
   build-and-lint:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Cache npm modules
+      - name: Cache node modules
         uses: actions/cache@v3
         with:
-          path: ~/.npm
+          path: |
+            ~/.npm
+            node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
-      
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
       - name: Check for vulnerabilities
-        run: npm audit --omit=dev --audit-level=high || true
+        run: npm audit --audit-level=high
 
       - name: Run unit tests
-        run: npm run test
+        run: npm run test -- --coverage

@@ -11,12 +11,16 @@ describe('TransactionService', () => {
     amount: 100,
   };
 
-  const mockTypeTransaction = 175;
+  const mockReportTransaction = {
+    totalCashIn: 100,
+    totalCashOut: 100,
+    balance: 100,
+  };
 
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
     get: jest.fn().mockResolvedValue([mockTransaction]),
-    getTotalAmountByType: jest.fn().mockResolvedValue(mockTypeTransaction),
+    getTransactionsReport: jest.fn().mockResolvedValue(mockReportTransaction),
   };
 
   beforeAll(async () => {
@@ -52,12 +56,13 @@ describe('TransactionService', () => {
     const transactions = await transactionService.get();
 
     expect(transactions).toEqual([mockTransaction]);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(transactionService.get).toHaveBeenCalled();
   });
 
   it('Should call create with preserved context', async () => {
     const executor = async (
-      callback: (data: typeof mockTransaction) => Promise<any>,
+      callback: (data: typeof mockTransaction) => Promise<object>,
     ) => {
       return await callback(mockTransaction);
     };
@@ -66,13 +71,11 @@ describe('TransactionService', () => {
     expect(result).toEqual(mockTransaction);
   });
 
-  it('Should find total type transaction', async () => {
-    const typeTransactions =
-      await transactionService.getTotalAmountByType('cashIn');
+  it('Should find report transaction', async () => {
+    const reportTransaction = await transactionService.getTransactionsReport();
 
-    expect(mockTransactionService.getTotalAmountByType).toHaveBeenCalledWith(
-      'cashIn',
-    );
-    expect(typeTransactions).toEqual(mockTypeTransaction);
+    expect(reportTransaction).toEqual(mockReportTransaction);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(transactionService.getTransactionsReport).toHaveBeenCalled();
   });
 });

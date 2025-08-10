@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../database/service/prisma.service';
 import { Transaction } from '@prisma/client';
+import { ReportTransactionDto } from '../dto/report-transaction.dto';
 
 @Injectable()
 export class TransactionService {
@@ -20,22 +21,28 @@ export class TransactionService {
     return this.model.transaction.findMany();
   }
 
-  async getTotalAmountByType(typeTransaction: string): Promise<number> {
-    const transactionsCashIn = await this.model.transaction.findMany({
-      where: {
-        type: typeTransaction,
-      },
-      select: {
-        amount: true,
-      },
+  async getTransactionsReport(): Promise<ReportTransactionDto> {
+    const results = await this.model.transaction.groupBy({
+      by: ['type'],
+      _sum: { amount: true },
     });
 
-    const total = transactionsCashIn.reduce(
-      (acc, transaction) => acc + transaction.amount,
-      0,
-    );
+    let totalCashIn = 0;
+    let totalCashOut = 0;
 
-    return total;
+    for (const item of results) {
+      if (item.type === 'cashIn') {
+        totalCashIn = item._sum.amount ?? 0;
+      }
+      if (item.type === 'cashOut') {
+        totalCashOut = item._sum.amount ?? 0;
+      }
+    }
+
+    return {
+      totalCashIn,
+      totalCashOut,
+      balance: totalCashIn - totalCashOut,
+    };
   }
-
 }
