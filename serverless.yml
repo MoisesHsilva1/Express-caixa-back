@@ -1,0 +1,23 @@
+service: express-caixa-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: sa-east-1
+
+plugins:
+  - serverless-offline
+  - serverless-jetpack
+
+package:
+  exclude:
+    - src/**
+    - src/**/*.spec.ts
+
+functions:
+  api:
+    handler: dist/lambda.handler  
+    events:
+      - httpApi:
+          method: any
+          path: /{proxy+}
