@@ -31,7 +31,7 @@ export const handler = async (
     cachedHandler = configure({ app: expressApp });
   }
 
-  return (cachedHandler as Handler)(
+  return cachedHandler(
     event,
     context,
     callback,

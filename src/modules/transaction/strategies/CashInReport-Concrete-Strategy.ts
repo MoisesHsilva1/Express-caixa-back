@@ -9,7 +9,7 @@ export class CashInReportConcreteStrategy implements ReportBalance {
   async execute(): Promise<string> {
     const total = await this.model.transaction.aggregate({
       _sum: { amount: true },
-      where: { type: 'cashIn' }, 
+      where: { type: 'cashIn' },
     });
     const totalCashIn = total._sum.amount ?? 0;
 
