@@ -8,6 +8,7 @@ describe('UserController', () => {
   const mockUser = {
     email: 'user@example.com',
     name: 'John Doe',
+    balance: 0,
     password: 'securePassword123',
   };
 

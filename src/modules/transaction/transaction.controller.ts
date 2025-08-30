@@ -1,14 +1,20 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from './service/transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from '@prisma/client';
-import { ReportTransactionDto } from './dto/report-transaction.dto';
+import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concrete-Strategy';
+import { CashInReportConcreteStrategy } from './strategies/CashInReport-Concrete-Strategy';
+import type { ReportBalance } from './interface/balanceMethod.interface';
 
 @ApiTags('Transctions')
 @Controller('transactions')
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly cashInReportStrategy: CashInReportConcreteStrategy,
+    private readonly cashOutReportStrategy: CashOutReportConcreteStrategy,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create transaction ' })
@@ -17,17 +23,26 @@ export class TransactionController {
     return this.transactionService.create(data);
   }
 
+  @Get('/:type')
+  @ApiOperation({ summary: 'Get report transactions by type' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  async getTotalCashByType(@Param('type') type: string): Promise<string> {
+    let strategy: ReportBalance | null = null;
+
+    if (type === 'cashIn') strategy = this.cashInReportStrategy;
+    if (type === 'cashOut') strategy = this.cashOutReportStrategy;
+
+    if (!strategy) {
+      throw new Error('Tipo de transação inválido');
+    }
+
+    return this.transactionService.getTotalCashByType(strategy);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get transactions ' })
   @ApiResponse({ status: 200, description: 'Sucess' })
   async get(): Promise<Transaction[]> {
     return this.transactionService.get();
-  }
-
-  @Get('transaction-report')
-  @ApiOperation({ summary: 'Get report transaction' })
-  @ApiResponse({ status: 200, description: 'Success' })
-  async getTotalAmountByType(): Promise<ReportTransactionDto> {
-    return this.transactionService.getTransactionsReport();
   }
 }

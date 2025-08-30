@@ -1,48 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../database/service/prisma.service';
 import { Transaction } from '@prisma/client';
-import { ReportTransactionDto } from '../dto/report-transaction.dto';
+import { CreateTransactionDto } from '../dto/create-transaction.dto';
+import type { ReportBalance } from '../interface/balanceMethod.interface';
 
 @Injectable()
 export class TransactionService {
   constructor(private readonly model: PrismaService) {}
 
-  async create(data: {
-    description: string;
-    type: string;
-    amount: number;
-  }): Promise<Transaction> {
-    return this.model.transaction.create({
-      data,
+  async create(data: CreateTransactionDto): Promise<Transaction> {
+    return await this.model.transaction.create({
+      data: {
+        type: data.type,
+        amount: data.amount,
+        description: data.description,
+      },
     });
+  }
+
+  async getTotalCashByType(strategy: ReportBalance): Promise<string> {
+    return await strategy.execute();
   }
 
   async get(): Promise<Transaction[]> {
-    return this.model.transaction.findMany();
-  }
-
-  async getTransactionsReport(): Promise<ReportTransactionDto> {
-    const results = await this.model.transaction.groupBy({
-      by: ['type'],
-      _sum: { amount: true },
-    });
-
-    let totalCashIn = 0;
-    let totalCashOut = 0;
-
-    for (const item of results) {
-      if (item.type === 'cashIn') {
-        totalCashIn = item._sum.amount ?? 0;
-      }
-      if (item.type === 'cashOut') {
-        totalCashOut = item._sum.amount ?? 0;
-      }
-    }
-
-    return {
-      totalCashIn,
-      totalCashOut,
-      balance: totalCashIn - totalCashOut,
-    };
+    return await this.model.transaction.findMany();
   }
 }

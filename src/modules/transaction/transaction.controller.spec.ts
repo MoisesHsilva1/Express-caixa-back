@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionController } from './transaction.controller';
 import { TransactionService } from './service/transaction.service';
+import { CashInReportConcreteStrategy } from './strategies/CashInReport-Concrete-Strategy';
+import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concrete-Strategy';
 
 describe('TransactionController', () => {
   let transactionController: TransactionController;
@@ -12,17 +14,20 @@ describe('TransactionController', () => {
     amount: 100,
   };
 
-  const mockReportTransaction = {
-    totalCashIn: 100,
-    totalCashOut: 100,
-    balance: 100,
+  const mockReportTransactionByType = {
+    totalCashIn: 600,
   };
 
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
     get: jest.fn().mockResolvedValue([mockTransaction]),
-    getTransactionsReport: jest.fn().mockResolvedValue(mockReportTransaction),
+    getTotalCashByType: jest
+      .fn()
+      .mockResolvedValue(mockReportTransactionByType),
   };
+
+  const mockCashInStrategy = {};
+  const mockCashOutStrategy = {};
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,6 +36,14 @@ describe('TransactionController', () => {
         {
           provide: TransactionService,
           useValue: mockTransactionService,
+        },
+        {
+          provide: CashInReportConcreteStrategy,
+          useValue: mockCashInStrategy,
+        },
+        {
+          provide: CashOutReportConcreteStrategy,
+          useValue: mockCashOutStrategy,
         },
       ],
     }).compile();
@@ -68,10 +81,27 @@ describe('TransactionController', () => {
     expect(result).toEqual([mockTransaction]);
   });
 
-  it('should return total amount of transactions by type', async () => {
-    const result = await transactionController.getTotalAmountByType();
+  it('should call getTotalCashByType with cashIn strategy', async () => {
+    const result = await transactionController.getTotalCashByType('cashIn');
 
-    expect(mockTransactionService.getTransactionsReport).toHaveBeenCalled();
-    expect(result).toEqual(mockReportTransaction);
+    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
+      mockCashInStrategy,
+    );
+    expect(result).toEqual(mockReportTransactionByType);
+  });
+
+  it('should call getTotalCashByType with cashOut strategy', async () => {
+    const result = await transactionController.getTotalCashByType('cashOut');
+
+    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
+      mockCashOutStrategy,
+    );
+    expect(result).toEqual(mockReportTransactionByType);
+  });
+
+  it('should throw error if type is invalid', async () => {
+    await expect(
+      transactionController.getTotalCashByType('invalid'),
+    ).rejects.toThrow('Tipo de transação inválido');
   });
 });
