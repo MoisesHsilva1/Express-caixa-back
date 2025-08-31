@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 export class CashOutReportConcreteStrategy implements ReportBalance {
   constructor(private readonly model: PrismaService) {}
 
-  async execute(): Promise<string> {
+  async execute(): Promise<number> {
     const response = await this.model.transaction.groupBy({
       by: ['type'],
       where: { type: 'cashOut' },
@@ -15,6 +15,6 @@ export class CashOutReportConcreteStrategy implements ReportBalance {
 
     const totalCashOut = response[0]?._sum?.amount ?? 0;
 
-    return `totalCashOut: ${totalCashOut}`;
+    return totalCashOut;
   }
 }

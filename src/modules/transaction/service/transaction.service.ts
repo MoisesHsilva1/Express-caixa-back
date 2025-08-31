@@ -18,7 +18,7 @@ export class TransactionService {
     });
   }
 
-  async getTotalCashByType(strategy: ReportBalance): Promise<string> {
+  async getTotalCashByType(strategy: ReportBalance): Promise<number> {
     return await strategy.execute();
   }
 

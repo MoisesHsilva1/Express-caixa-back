@@ -1,3 +1,3 @@
 export interface ReportBalance {
-  execute(): Promise<string>;
+  execute(): Promise<number>;
 }

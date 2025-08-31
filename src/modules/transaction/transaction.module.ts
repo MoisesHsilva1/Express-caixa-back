@@ -4,6 +4,7 @@ import { TransactionController } from './transaction.controller';
 import { PrismaModule } from 'src/database/prisma.module';
 import { CashInReportConcreteStrategy } from './strategies/CashInReport-Concrete-Strategy';
 import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concrete-Strategy';
+import { BalanceReportConcreteStrategy } from './strategies/BalanceReport-Concrete-Strategy';
 
 @Module({
   imports: [PrismaModule],
@@ -11,6 +12,7 @@ import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concre
     TransactionService,
     CashInReportConcreteStrategy,
     CashOutReportConcreteStrategy,
+    BalanceReportConcreteStrategy,
   ],
   controllers: [TransactionController],
 })

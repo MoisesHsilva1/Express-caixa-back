@@ -6,6 +6,7 @@ import { Transaction } from '@prisma/client';
 import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concrete-Strategy';
 import { CashInReportConcreteStrategy } from './strategies/CashInReport-Concrete-Strategy';
 import type { ReportBalance } from './interface/balanceMethod.interface';
+import { BalanceReportConcreteStrategy } from './strategies/BalanceReport-Concrete-Strategy';
 
 @ApiTags('Transctions')
 @Controller('transactions')
@@ -14,6 +15,7 @@ export class TransactionController {
     private readonly transactionService: TransactionService,
     private readonly cashInReportStrategy: CashInReportConcreteStrategy,
     private readonly cashOutReportStrategy: CashOutReportConcreteStrategy,
+    private readonly balanceReportStrategy: BalanceReportConcreteStrategy,
   ) {}
 
   @Post()
@@ -26,11 +28,22 @@ export class TransactionController {
   @Get('/:type')
   @ApiOperation({ summary: 'Get report transactions by type' })
   @ApiResponse({ status: 200, description: 'Success' })
-  async getTotalCashByType(@Param('type') type: string): Promise<string> {
+  async getTotalCashByType(@Param('type') type: string): Promise<number> {
     let strategy: ReportBalance | null = null;
 
-    if (type === 'cashIn') strategy = this.cashInReportStrategy;
-    if (type === 'cashOut') strategy = this.cashOutReportStrategy;
+    switch (type) {
+      case 'cashIn':
+        strategy = this.cashInReportStrategy;
+        break;
+      case 'cashOut':
+        strategy = this.cashOutReportStrategy;
+        break;
+      case 'balance':
+        strategy = this.balanceReportStrategy;
+        break;
+      case "report": 
+        
+    }
 
     if (!strategy) {
       throw new Error('Tipo de transação inválido');

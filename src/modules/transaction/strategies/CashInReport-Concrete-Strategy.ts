@@ -6,13 +6,13 @@ import { Injectable } from '@nestjs/common';
 export class CashInReportConcreteStrategy implements ReportBalance {
   constructor(private readonly model: PrismaService) {}
 
-  async execute(): Promise<string> {
+  async execute(): Promise<number> {
     const total = await this.model.transaction.aggregate({
       _sum: { amount: true },
       where: { type: 'cashIn' },
     });
     const totalCashIn = total._sum.amount ?? 0;
 
-    return `totalCashIn: ${totalCashIn}`;
+    return totalCashIn;
   }
 }
