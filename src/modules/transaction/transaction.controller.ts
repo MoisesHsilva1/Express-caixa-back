@@ -41,8 +41,6 @@ export class TransactionController {
       case 'balance':
         strategy = this.balanceReportStrategy;
         break;
-      case "report": 
-        
     }
 
     if (!strategy) {

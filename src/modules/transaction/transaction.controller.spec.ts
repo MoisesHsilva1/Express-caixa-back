@@ -3,6 +3,7 @@ import { TransactionController } from './transaction.controller';
 import { TransactionService } from './service/transaction.service';
 import { CashInReportConcreteStrategy } from './strategies/CashInReport-Concrete-Strategy';
 import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concrete-Strategy';
+import { BalanceReportConcreteStrategy } from './strategies/BalanceReport-Concrete-Strategy';
 
 describe('TransactionController', () => {
   let transactionController: TransactionController;
@@ -28,6 +29,7 @@ describe('TransactionController', () => {
 
   const mockCashInStrategy = {};
   const mockCashOutStrategy = {};
+  const mockBalanceStrategy = {};
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,6 +46,10 @@ describe('TransactionController', () => {
         {
           provide: CashOutReportConcreteStrategy,
           useValue: mockCashOutStrategy,
+        },
+        {
+          provide: BalanceReportConcreteStrategy,
+          useValue: mockBalanceStrategy,
         },
       ],
     }).compile();
@@ -95,6 +101,15 @@ describe('TransactionController', () => {
 
     expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
       mockCashOutStrategy,
+    );
+    expect(result).toEqual(mockReportTransactionByType);
+  });
+
+  it('should call getTotalCashByType with balance strategy', async () => {
+    const result = await transactionController.getTotalCashByType('balance');
+
+    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
+      mockBalanceStrategy,
     );
     expect(result).toEqual(mockReportTransactionByType);
   });
