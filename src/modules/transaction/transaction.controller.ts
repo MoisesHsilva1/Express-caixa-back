@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from 'src/commom/guard/auth.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from './service/transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -7,8 +16,10 @@ import { CashOutReportConcreteStrategy } from './strategies/CashOutReport-Concre
 import { CashInReportConcreteStrategy } from './strategies/CashInReport-Concrete-Strategy';
 import type { ReportBalance } from './interface/balanceMethod.interface';
 import { BalanceReportConcreteStrategy } from './strategies/BalanceReport-Concrete-Strategy';
+import type { Request } from 'express';
 
-@ApiTags('Transctions')
+@ApiTags('Transactions')
+@UseGuards(AuthGuard)
 @Controller('transactions')
 export class TransactionController {
   constructor(
@@ -21,14 +32,22 @@ export class TransactionController {
   @Post()
   @ApiOperation({ summary: 'Create transaction ' })
   @ApiResponse({ status: 201, description: 'Success' })
-  async create(@Body() data: CreateTransactionDto) {
-    return this.transactionService.create(data);
+  async create(
+    @Body() data: CreateTransactionDto,
+    @Req() req: Request,
+  ): Promise<Transaction> {
+    const tenantId = req['tenantId'];
+    return this.transactionService.create(data, tenantId);
   }
 
   @Get('/:type')
   @ApiOperation({ summary: 'Get report transactions by type' })
   @ApiResponse({ status: 200, description: 'Success' })
-  async getTotalCashByType(@Param('type') type: string): Promise<number> {
+  async getTotalCashByType(
+    @Param('type') type: string,
+    @Req() req: Request,
+  ): Promise<number> {
+    const tenantId = req['tenantId'];
     let strategy: ReportBalance | null = null;
 
     switch (type) {
@@ -44,16 +63,17 @@ export class TransactionController {
     }
 
     if (!strategy) {
-      throw new Error('Tipo de transação inválido');
+      throw new Error('Type invalid transaction');
     }
 
-    return this.transactionService.getTotalCashByType(strategy);
+    return this.transactionService.getTotalCashByType(strategy, tenantId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get transactions ' })
   @ApiResponse({ status: 200, description: 'Sucess' })
-  async get(): Promise<Transaction[]> {
-    return this.transactionService.get();
+  async get(@Req() req: Request): Promise<Transaction[]> {
+    const tenantId = req['tenantId'];
+    return this.transactionService.get(tenantId);
   }
 }

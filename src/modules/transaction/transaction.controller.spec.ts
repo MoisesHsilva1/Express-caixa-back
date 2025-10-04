@@ -15,16 +15,12 @@ describe('TransactionController', () => {
     amount: 100,
   };
 
-  const mockReportTransactionByType = {
-    totalCashIn: 600,
-  };
+  const mockReportTransactionByType = 600;
 
   const mockTransactionService = {
     create: jest.fn().mockResolvedValue(mockTransaction),
     get: jest.fn().mockResolvedValue([mockTransaction]),
-    getTotalCashByType: jest
-      .fn()
-      .mockResolvedValue(mockReportTransactionByType),
+    getTotalCashByType: jest.fn().mockResolvedValue(mockReportTransactionByType),
   };
 
   const mockCashInStrategy = {};
@@ -73,50 +69,45 @@ describe('TransactionController', () => {
       type: 'cashIn',
       amount: 100,
     };
-
-    const result = await transactionController.create(dto);
-
-    expect(mockTransactionService.create).toHaveBeenCalledWith(dto);
+    const mockReq = { tenantId: 'tenant-123' } as any;
+    const result = await transactionController.create(dto, mockReq);
+    expect(mockTransactionService.create).toHaveBeenCalledWith(
+      dto,
+      'tenant-123',
+    );
     expect(result).toEqual(mockTransaction);
   });
 
   it('should call get and return all transactions', async () => {
-    const result = await transactionController.get();
-
+    const mockReq = { tenantId: 'tenant-123' } as any;
+    const result = await transactionController.get(mockReq);
     expect(mockTransactionService.get).toHaveBeenCalled();
     expect(result).toEqual([mockTransaction]);
   });
 
   it('should call getTotalCashByType with cashIn strategy', async () => {
-    const result = await transactionController.getTotalCashByType('cashIn');
-
-    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
-      mockCashInStrategy,
-    );
-    expect(result).toEqual(mockReportTransactionByType);
+    const mockReq = { tenantId: 'tenant-123' } as any;
+    const result = await transactionController.getTotalCashByType('cashIn', mockReq);
+    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(mockCashInStrategy, 'tenant-123');
+    expect(result).toBe(mockReportTransactionByType);
   });
 
   it('should call getTotalCashByType with cashOut strategy', async () => {
-    const result = await transactionController.getTotalCashByType('cashOut');
-
-    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
-      mockCashOutStrategy,
-    );
-    expect(result).toEqual(mockReportTransactionByType);
+    const mockReq = { tenantId: 'tenant-123' } as any;
+    const result = await transactionController.getTotalCashByType('cashOut', mockReq);
+    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(mockCashOutStrategy, 'tenant-123');
+    expect(result).toBe(mockReportTransactionByType);
   });
 
   it('should call getTotalCashByType with balance strategy', async () => {
-    const result = await transactionController.getTotalCashByType('balance');
-
-    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(
-      mockBalanceStrategy,
-    );
-    expect(result).toEqual(mockReportTransactionByType);
+    const mockReq = { tenantId: 'tenant-123' } as any;
+    const result = await transactionController.getTotalCashByType('balance', mockReq);
+    expect(mockTransactionService.getTotalCashByType).toHaveBeenCalledWith(mockBalanceStrategy, 'tenant-123');
+    expect(result).toBe(mockReportTransactionByType);
   });
 
   it('should throw error if type is invalid', async () => {
-    await expect(
-      transactionController.getTotalCashByType('invalid'),
-    ).rejects.toThrow('Tipo de transação inválido');
+    const mockReq = { tenantId: 'tenant-123' } as any;
+    await expect(transactionController.getTotalCashByType('invalid', mockReq)).rejects.toThrow('Type invalid transaction');
   });
 });

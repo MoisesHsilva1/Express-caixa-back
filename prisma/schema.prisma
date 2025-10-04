@@ -7,17 +7,16 @@ datasource db {
     url = env("DATABASE_URL")
 }
 
-model User {
-    id        String   @id @default(uuid())
+model Tenant {
+    id        String   @id
     email     String   @unique
     name      String
-    password  String
     createdAt DateTime @default(now())
 }
 
 model Transaction {
     id  Int  @default(autoincrement()) @id
-    user_id String?
+    tenant_id String
     description String
     amount Int
     type String

@@ -13,6 +13,7 @@ describe('TransactionService', () => {
     description: 'New investment',
     type: 'cashIn',
     amount: 100,
+    tenant_id: 'tenant-123',
   };
 
   const mockTransactions = [mockTransaction];
@@ -59,34 +60,38 @@ describe('TransactionService', () => {
       type: 'cashIn',
       amount: 100,
     };
-
-    const createdTransaction = await transactionService.create(dto);
-
+    const tenantId = 'tenant-123';
+    const createdTransaction = await transactionService.create(dto, tenantId);
     expect(prismaService.transaction.create).toHaveBeenCalledWith({
       data: {
         type: dto.type,
         amount: dto.amount,
         description: dto.description,
+        tenant_id: tenantId,
       },
     });
     expect(createdTransaction).toEqual(mockTransaction);
   });
 
   it('Should return all transactions', async () => {
-    const transactions = await transactionService.get();
-
-    expect(prismaService.transaction.findMany).toHaveBeenCalled();
+    const tenantId = 'tenant-123';
+    const transactions = await transactionService.get(tenantId);
+    expect(prismaService.transaction.findMany).toHaveBeenCalledWith({
+      where: { tenant_id: tenantId },
+    });
     expect(transactions).toEqual(mockTransactions);
   });
 
   it('Should execute strategy for getTotalCashByType', async () => {
+    const tenantId = 'tenant-123';
     const mockStrategy: ReportBalance = {
-      execute: jest.fn().mockResolvedValue(mockReportTransaction),
+      execute: jest.fn().mockResolvedValue(100),
     };
-
-    const result = await transactionService.getTotalCashByType(mockStrategy);
-
-    expect(mockStrategy.execute).toHaveBeenCalled();
-    expect(result).toEqual(mockReportTransaction);
+    const result = await transactionService.getTotalCashByType(
+      mockStrategy,
+      tenantId,
+    );
+    expect(mockStrategy.execute).toHaveBeenCalledWith(tenantId);
+    expect(result).toBe(100);
   });
 });

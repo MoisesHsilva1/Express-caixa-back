@@ -1,8 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod, NestModule } from '@nestjs/common';
+import { TenantMiddleware } from './commom/middleware/tenant.middleware';
 import { PrismaModule } from './database/prisma.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './modules/user/user.module';
+import { TenantModule } from './modules/tenant/tenant.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { AuthGuard } from './commom/guard/auth.guard';
 
 @Module({
   imports: [
@@ -10,10 +13,19 @@ import { UserModule } from './modules/user/user.module';
       isGlobal: true,
     }),
     TransactionModule,
-    UserModule,
+    TenantModule,
+    AuthModule,
     PrismaModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{
+    provide: 'APP_GUARD',
+    useClass: AuthGuard,
+  }],
 })
-export class AppModule {}
+
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TenantMiddleware).forRoutes('*');
+  }
+}

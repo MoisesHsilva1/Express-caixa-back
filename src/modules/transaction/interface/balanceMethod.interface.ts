@@ -1,3 +1,3 @@
 export interface ReportBalance {
-  execute(): Promise<number>;
+  execute(tenantId: string): Promise<number>;
 }

@@ -10,9 +10,9 @@ export class BalanceReportConcreteStrategy implements ReportBalance {
     private readonly cashOutStrategy: CashOutReportConcreteStrategy,
   ) {}
 
-  async execute(): Promise<number> {
-    const cashIn = await this.cashInStrategy.execute();
-    const cashOut = await this.cashOutStrategy.execute();
+  async execute(tenantId: string): Promise<number> {
+    const cashIn = await this.cashInStrategy.execute(tenantId);
+    const cashOut = await this.cashOutStrategy.execute(tenantId);
 
     return cashIn - cashOut;
   }
